@@ -9,8 +9,8 @@ spec:
     server: 'https://kubernetes.default.svc'
   source:
     path: bootstrap/workflow-templates
-    repoURL: 'https://github.com/sendible-labs/argo-workflows-ci-example.git'
-    targetRevision: HEAD
+    repoURL: 'https://github.com/life0215/argo-workflows-ci-example.git'
+    targetRevision: dev
   project: default
   syncPolicy:
     automated:

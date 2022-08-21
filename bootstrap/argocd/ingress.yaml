@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: argocd-server
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: argocd.localhost
+    http:
+      paths:
+      - path: /
+        pathType: ImplementationSpecific
+        backend:
+          service: 
+            name: argocd-server
+            port: 
+              number: 80
+  tls:
+  - hosts:
+    - localhost
+    secretName: tls.localhost

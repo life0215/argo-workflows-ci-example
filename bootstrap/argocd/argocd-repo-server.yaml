@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: argocd-repo-server
+spec:
+  template:
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - entrypoint.sh argocd-repo-server --redis argocd-redis:6379
+        name: argocd-repo-server
+        envFrom:
+        - secretRef:
+            name: argocd-vault-plugin-credentials
+        volumeMounts:
+        - mountPath: /usr/local/bin/argocd-vault-plugin
+          name: custom-tools
+          subPath: argocd-vault-plugin
+      initContainers:
+      - args:
+        - wget -O argocd-vault-plugin https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v${AVP_VERSION}/argocd-vault-plugin_${AVP_VERSION}_linux_amd64
+          && chmod +x argocd-vault-plugin && mv argocd-vault-plugin /custom-tools/
+        command:
+        - sh
+        - -c
+        env:
+        - name: AVP_VERSION
+          value: 1.11.0
+        image: alpine:3.8
+        imagePullPolicy: IfNotPresent
+        name: download-tools
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /custom-tools
+          name: custom-tools
+      volumes:
+      - emptyDir: {}
+        name: custom-tools

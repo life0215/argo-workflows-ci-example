@@ -90,7 +90,7 @@ This is a very simplified workflow aiming to highlight what's possible using Arg
 * Storing secrets more sensibly and injecting them only when required. We use Hashicorp Vault to achieve this. We strongly advise against putting any secret into git.
 * Leveraging things like AWS spot instances and the cluster autoscaler to keep node costs down.
 * Using much more restrictive Argo CD and Argo Workflows RBAC policies.
-* Using something like the [ci-github-notifier](https://github.com/sendible-labs/ci-github-notifier) to annotate pull requests and branches with the status of your CI.
+* Using something like the [ci-github-notifier](https://github.com/life0215/ci-github-notifier) to annotate pull requests and branches with the status of your CI.
 * Use dedicated images for the job. Don't pull alpine and install git on each run, use a custom alpine-git image. We just did the example this way to reduce the number of dependencies required to get up and running.
 
 
