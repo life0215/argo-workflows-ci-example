@@ -1,0 +1,51 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cmp-plugin
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: argocd-vault-plugin
+    spec:
+      version: v1.0
+      generate:
+        command: ["argocd-vault-plugin"]
+        args: ["generate", "./"]
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: argocd-vault-plugin-helm
+    spec:
+      version: v1.0
+      init:
+        command: [sh, -c]
+        args: ["helm dependency build"]
+      generate:
+        command: ["sh", "-c"]
+        args: ["helm template ${ARGOCD_ENV_helm_args} . --include-crds | argocd-vault-plugin generate -"]
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: kustomized-helm
+    spec:
+      version: v1.0
+      init:
+        command: [sh, -c]
+        args: ["helm dependency build"]
+      generate:
+        command: ["sh", "-c"]
+        args: ["helm template ${ARGOCD_ENV_helm_args} . --include-crds | argocd-vault-plugin generate - > all.yaml && kustomize build ${ARGOCD_ENV_build_path}"]
+    ---
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: argocd-vault-plugin-kustomize
+    spec:
+      version: v1.0
+      generate:
+        command: ["sh", "-c"]
+        args: ["kustomize build . | argocd-vault-plugin generate -"]
