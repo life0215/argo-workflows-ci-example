@@ -13,6 +13,8 @@ data:
       generate:
         command: ["argocd-vault-plugin"]
         args: ["generate", "./"]
+      discover:
+        fileName: "./*.*"
     ---
     apiVersion: argoproj.io/v1alpha1
     kind: ConfigManagementPlugin
@@ -26,6 +28,8 @@ data:
       generate:
         command: ["sh", "-c"]
         args: ["helm template ${ARGOCD_ENV_helm_args} . --include-crds | argocd-vault-plugin generate -"]
+      discover:
+        fileName: "./Chart.y*ml"
     ---
     apiVersion: argoproj.io/v1alpha1
     kind: ConfigManagementPlugin
@@ -39,6 +43,8 @@ data:
       generate:
         command: ["sh", "-c"]
         args: ["helm template ${ARGOCD_ENV_helm_args} . --include-crds | argocd-vault-plugin generate - > all.yaml && kustomize build ${ARGOCD_ENV_build_path}"]
+      discover:
+        fileName: "./Chart.y*ml"
     ---
     apiVersion: argoproj.io/v1alpha1
     kind: ConfigManagementPlugin
@@ -49,3 +55,5 @@ data:
       generate:
         command: ["sh", "-c"]
         args: ["kustomize build . | argocd-vault-plugin generate -"]
+      discover:
+        fileName: "./kustomization.y*ml"
