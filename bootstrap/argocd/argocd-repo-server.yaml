@@ -11,6 +11,7 @@ spec:
         - -c
         - entrypoint.sh argocd-repo-server --redis argocd-redis:6379
         name: argocd-repo-server
+        resources: {}
         envFrom:
         - secretRef:
             name: argocd-vault-plugin-credentials
@@ -18,9 +19,19 @@ spec:
         - mountPath: /usr/local/bin/argocd-vault-plugin
           name: custom-tools
           subPath: argocd-vault-plugin
+        - mountPath: /usr/local/bin/helm
+          name: custom-tools
+          subPath: helm
       - name: cmp
-        command: [/var/run/argocd/argocd-cmp-server] # Entrypoint should be Argo CD lightweight CMP server i.e. argocd-cmp-server
-        image: busybox # This can be off-the-shelf or custom-built image
+        command:
+         - sh
+         - -c
+         - /var/run/argocd/argocd-cmp-server # Entrypoint should be Argo CD lightweight CMP server i.e. argocd-cmp-server
+        image: quay.io/argoproj/argocd:v2.5.2  # This can be off-the-shelf or custom-built image
+        resources: {}
+        envFrom:
+        - secretRef:
+            name: argocd-vault-plugin-credentials
         securityContext:
           runAsNonRoot: true
           runAsUser: 999
@@ -32,11 +43,17 @@ spec:
           # Remove this volumeMount if you've chosen to bake the config file into the sidecar image.
           - mountPath: /home/argocd/cmp-server/config/plugin.yaml
             subPath: plugin.yaml
-            name: cmp-plugin
+            name: cmp-avp-helm
           # Starting with v2.4, do NOT mount the same tmp volume as the repo-server container. The filesystem separation helps 
           # mitigate path traversal attacks.
           - mountPath: /tmp
-            name: cmp-tmp
+            name: cmp-avp-helm-tmp
+          - mountPath: /usr/local/bin/helm
+            name: custom-tools
+            subPath: helm
+          - mountPath: /usr/local/bin/argocd-vault-plugin
+            name: custom-tools
+            subPath: argocd-vault-plugin
       initContainers:
       - args:
         - |
@@ -66,7 +83,7 @@ spec:
       - emptyDir: {}
         name: custom-tools
       - configMap:
-          name: cmp-plugin
-        name: cmp-plugin
+          name: cmp-avp-helm
+        name: cmp-avp-helm
       - emptyDir: {}
-        name: cmp-tmp
+        name: cmp-avp-helm-tmp
