@@ -22,7 +22,7 @@ spec:
         - mountPath: /usr/local/bin/helm
           name: custom-tools
           subPath: helm
-      - name: cmp
+      - name: cmp-avp-helm
         command:
          - sh
          - -c
@@ -44,10 +44,42 @@ spec:
           - mountPath: /home/argocd/cmp-server/config/plugin.yaml
             subPath: plugin.yaml
             name: cmp-avp-helm
-          # Starting with v2.4, do NOT mount the same tmp volume as the repo-server container. The filesystem separation helps 
+          # Starting with v2.4, do NOT mount the same tmp volume as the repo-server container. The filesystem separation helps
           # mitigate path traversal attacks.
           - mountPath: /tmp
             name: cmp-avp-helm-tmp
+          - mountPath: /usr/local/bin/helm
+            name: custom-tools
+            subPath: helm
+          - mountPath: /usr/local/bin/argocd-vault-plugin
+            name: custom-tools
+            subPath: argocd-vault-plugin
+      - name: cmp-avp-kustomize
+        command:
+         - sh
+         - -c
+         - /var/run/argocd/argocd-cmp-server # Entrypoint should be Argo CD lightweight CMP server i.e. argocd-cmp-server
+        image: quay.io/argoproj/argocd:v2.5.2  # This can be off-the-shelf or custom-built image
+        resources: {}
+        envFrom:
+        - secretRef:
+            name: argocd-vault-plugin-credentials
+        securityContext:
+          runAsNonRoot: true
+          runAsUser: 999
+        volumeMounts:
+          - mountPath: /var/run/argocd
+            name: var-files
+          - mountPath: /home/argocd/cmp-server/plugins
+            name: plugins
+          # Remove this volumeMount if you've chosen to bake the config file into the sidecar image.
+          - mountPath: /home/argocd/cmp-server/config/plugin.yaml
+            subPath: plugin.yaml
+            name: cmp-avp-kustomize
+          # Starting with v2.4, do NOT mount the same tmp volume as the repo-server container. The filesystem separation helps
+          # mitigate path traversal attacks.
+          - mountPath: /tmp
+            name: cmp-avp-kustomize-tmp
           - mountPath: /usr/local/bin/helm
             name: custom-tools
             subPath: helm
@@ -69,7 +101,7 @@ spec:
         - name: AVP_VERSION
           value: 1.11.0
         - name: HELM_VERSION
-          value: "v3.9.3"
+          value: "v3.10.0"
         image: alpine:3.8
         imagePullPolicy: IfNotPresent
         name: download-tools
@@ -87,3 +119,8 @@ spec:
         name: cmp-avp-helm
       - emptyDir: {}
         name: cmp-avp-helm-tmp
+      - configMap:
+          name: cmp-avp-kustomize
+        name: cmp-avp-kustomize
+      - emptyDir: {}
+        name: cmp-avp-kustomize-tmp

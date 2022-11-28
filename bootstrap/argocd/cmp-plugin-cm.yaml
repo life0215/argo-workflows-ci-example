@@ -12,7 +12,7 @@ data:
       version: v1.0
       init:
         command: [sh, -c]
-        args: ["helm dependency build"]
+        args: ["helm dependency build; chmod  +x *.sh"]
       generate:
         command: ["sh", "-c"]
         args: ["helm template ${ARGOCD_ENV_helm_args} . --include-crds | argocd-vault-plugin generate -"]
@@ -22,4 +22,25 @@ data:
           - sh
           - -c
           - if [ "$ARGOCD_ENV_PLUGIN_NAME" = "argocd-vault-plugin-helm" ]; then  echo $ARGOCD_ENV_PLUGIN_NAME; fi
-  
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cmp-avp-kustomize
+data:
+  plugin.yaml: |
+    apiVersion: argoproj.io/v1alpha1
+    kind: ConfigManagementPlugin
+    metadata:
+      name: argocd-vault-plugin-kustomize
+    spec:
+      version: v1.0
+      generate:
+        command: ["sh", "-c"]
+        args: ["kustomize build . | argocd-vault-plugin generate -"]
+      discover:
+        find:
+          command:
+          - sh
+          - -c
+          - if [ "$ARGOCD_ENV_PLUGIN_NAME" = "argocd-vault-plugin-kustomize" ]; then  echo $ARGOCD_ENV_PLUGIN_NAME; fi
