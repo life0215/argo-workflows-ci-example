@@ -13,10 +13,6 @@ spec:
     path: bootstrap/nfs-server-provisioner
     repoURL: 'https://github.com/life0215/argo-workflows-ci-example.git'
     targetRevision: dev
-  plugin:
-    env:
-      - name: PLUGIN_NAME
-        value: argocd-vault-plugin-helm
   project: default
   syncPolicy:
     automated:
