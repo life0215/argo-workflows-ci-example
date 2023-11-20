@@ -3,6 +3,7 @@ data:
   ui.bannercontent: "Security Goose says: This is a demo installation for the argo-workflows-ci-example. Not for production use. Honk!"
   ui.bannerpermanent: "true"
   application.resourceTrackingMethod: annotation+label
+  application.instanceLabelKey: argocd.argoproj.io/instance
   configManagementPlugins: |-
     - name: argocd-vault-plugin
       generate:
